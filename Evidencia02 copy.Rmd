@@ -1,0 +1,237 @@
+---
+title: "Evidencia 2"
+author: "Raúl Armando Vélez Robles A01782488"
+date: "04/5/2022"
+output: html_document
+---
+![](https://javier.rodriguez.org.mx/itesm/2014/tecnologico-de-monterrey-blue-med.png)
+
+## Parte 1
+
+Link al video de youtube: https://youtu.be/6DOpwwpkt4Q
+
+## Parte 2
+
+***1. De las siguientes tres opciones, selecciona una opción para investigar: ***
+
+* a) Analizar las secuencias de SARS-CoV-2 reportadas en los 20 países con más casos reportados. Y puedes tratar de responder a la pregunta: ¿Son muy diferentes las variantes entre cada país? ¿Es diferente el SARS-CoV-2 entre las diferentes poblaciones: Asiática, Hispana, Europea o Africana?
+
+* b) Trabajar con las secuencias de los coronavirus de otras especies que son similares a SARS-CoV-2, para tratar de explicar el fenómeno de zoonosis del virus. Incluye 20 especies reportadas. Puedes trabajar con variantes de SARS-CoV-2 de otros países.
+
+* c) Estudia la cercanía de SARS-CoV-2 con otros coronavirus humanos que ocasionan enfermedades similares (como MERS). En tu investigación debes trabajar con 20 virus diferentes.
+
+
+Para este trabajo se utilizó la opción a), el analizar las secuencias de SARS-CoV-2 reportadas en los 20 países con más casos reportados.
+
+***setup de librerias***
+```{r setup, warning=FALSE,message=FALSE}
+library(seqinr)
+library(Biostrings)
+library(seqinr)
+library(adegenet)
+library(ape)
+library(ggtree)
+library(DECIPHER)
+library(viridis)
+library(ggplot2)
+library(viridis)
+library(ggmsa)
+```
+
+***Obtengo las secuencias de la variante ómicron de SARS-CoV-2 desde GISAID de los 20 paises, la mayor cantidad histórica de casos de covid***
+```{r, warning=FALSE}
+usa <- read.fasta("usa.fasta")
+india <- read.fasta("india.fasta")
+brazil <- read.fasta("brazil.fasta")
+france <- read.fasta("france.fasta")
+germany <- read.fasta("germany.fasta")
+uk <- read.fasta("uk.fasta")
+russia <- read.fasta("russia.fasta")
+southKorea <- read.fasta("sk.fasta")
+italy <- read.fasta("italy.fasta")
+turkey <- read.fasta("turkey.fasta")
+spain <- read.fasta("spain.fasta")
+vietnam <- read.fasta("vietnam.fasta")
+argentina <- read.fasta("argentina.fasta")
+netherlands <- read.fasta("netherlands.fasta")
+japan <- read.fasta("japan.fasta")
+iran <- read.fasta("iran.fasta")
+australia <- read.fasta("australia.fasta")
+colombia <- read.fasta("colombia.fasta")
+indonesia <- read.fasta("indonesia.fasta")
+poland <- read.fasta("poland.fasta")
+vih <- read.fasta("vih.fasta")
+
+sequences <- c(usa, india, brazil, france, germany, uk, russia, southKorea, italy, turkey, spain, vietnam, argentina, netherlands, japan, iran, australia, colombia, indonesia, poland, vih)
+
+sequencesSize <- list(usa, india, brazil, france, germany, uk, russia, southKorea, italy, turkey, spain, vietnam, argentina, netherlands, japan, iran, australia, colombia, indonesia, poland, vih)
+
+```
+
+
+***2. Calcula la longitud de las secuencias que incluyas.***
+```{r}
+size <- lapply(sequencesSize, lengths)
+size
+```
+
+***3. Crea una sola gráfica donde se comparen el número de bases de ADN que componen todas las variantes del virus.***
+```{r}
+bases <- function(seq){
+  counterA <-0
+  counterT <-0
+  counterC <-0
+  counterG <-0
+  empty <-0
+  
+  nl <- length(seq)
+  
+  for(i in seq){
+    
+    if(i=="A" || i=="a"){
+      counterA = counterA + 1
+    }
+    else if(i=="T" || i=="t") {
+      counterT = counterT + 1
+    }
+    else if(i=="C" || i=="c") {
+      counterC = counterC + 1
+    }
+    else if(i=="G" || i=="g") {
+      counterG = counterG + 1
+    }
+  }
+  
+  vec<- c(counterA,counterT,counterG, counterC)
+  return(vec)
+}
+
+c01<-sapply(usa, bases)
+c02<-sapply(india, bases)
+c03<-sapply(brazil, bases)
+c04<-sapply(france, bases)
+c05<-sapply(germany, bases)
+c06<-sapply(uk, bases)
+c07<-sapply(russia, bases)
+c08<-sapply(southKorea, bases)
+c09<-sapply(italy, bases)
+c10<-sapply(turkey, bases)
+c11<-sapply(spain, bases)
+c12<-sapply(vietnam, bases)
+c13<-sapply(argentina, bases)
+c14<-sapply(netherlands, bases)
+c15<-sapply(japan, bases)
+c16<-sapply(iran, bases)
+c17<-sapply(australia, bases)
+c18<-sapply(colombia, bases)
+c19<-sapply(indonesia, bases)
+c20<-sapply(poland, bases)
+c21<-sapply(vih,bases)
+
+countriesNames = c("E.E.U.U","India","Brasil", "Francia", "Alemania", "Reino Unido", "Rusia", "Corea del Sur", "Italia", "Turquía", "España", "Vietnam", "Argentina", "Países Bajos", "Japón", "Irán", "Australia", "Colombia", "Indonesia", "Polonia","VIH")
+
+par(mar=c(5,4,4,8), xpd=T)
+colors = viridis(21)
+barplot(matrix(c(c01,c02,c03,c04,c05,c06,c07,c08,c09,c10,c11,c12,c13,c14,c15,c16,c17,c18,c19,c20,c21),nrow=21, byrow=T),
+        beside=T,
+        main="Cantidad de bases por secuencia de SARS-CoV-2 en cada país",
+        xlab="Bases",
+        ylab="Cantidad",
+        ylim=c(0,10000),
+        col=colors,
+        las=2,
+        names.arg= c("A","T","G", "C"))
+
+legend("topright", 
+       legend = countriesNames , 
+       col = colors,
+       bty = "n",
+       pch=15, 
+       title="Países",
+       inset=c(-0.23, -0.08),
+       pt.cex = 1, 
+       cex = 0.8)
+     
+```
+
+***4. Agrega un análisis jerárquico global obtenido de las secuencias que se seleccionaron para estudiar.***
+```{r, warning=FALSE, message=FALSE, echo=T, results='hide'}
+
+write.dna(sequences,  
+          file ="virus_seqs.fasta", 
+          format = "fasta", 
+          append = FALSE, 
+          nbcol = 6, 
+          colsep = " ", 
+          colw = 20)
+
+virus_seq_not_align <- readDNAStringSet("virus_seqs.fasta", format = "fasta")
+
+virus_seq_not_align <- OrientNucleotides(virus_seq_not_align)
+
+virus_seq_align <- AlignSeqs(virus_seq_not_align)
+
+BrowseSeqs(virus_seq_align, highlight=0)
+
+writeXStringSet(virus_seq_align, file="virus_seq_align.fasta")
+
+virus_aligned <- read.alignment("virus_seq_align.fasta", format = "fasta")
+
+matriz_distancia <- dist.alignment(virus_aligned, matrix = "similarity")
+
+virus_tree <- nj(matriz_distancia)
+class(virus_tree) 
+
+virus_tree <- ladderize(virus_tree)
+
+ggtree(virus_tree, branch.length = "none") + 
+  geom_tiplab() + ggplot2::xlim(0,10)+
+  geom_hilight(node=25, fill="green") + 
+  geom_hilight(node=23, fill="red") + 
+  geom_hilight(node=36, fill="blue") +
+  geom_hilight(node=32, fill="blue") +
+  geom_hilight(node=30, fill="gold") +
+  geom_hilight(node=22, fill="grey") +
+  ggtitle("Árbol filogenético de las secuencias de la variante Ómicron de SARS-CoV-2") 
+
+```
+
+***5. Agrega una interpretación escrita de tus gráficas y tus conclusiones según el caso de estudio que seleccionaste. No olvides sustentar tus argumentos con las lecturas que realizaste.***
+
+De la gráfica de barras se puede describir que en general la cantidad de bases por la secuencia de cada país no varía demasiado, siendo la Timina y Adenina las más presentes, sobre la Guanina y Citosina. Esto puede tener varias interpretaciones, y la principal es que las bases del virus no varían demasiado entre secuencias, ya que todas pertenecen a la variante de Ómicron, por lo cual si se encontrara mayor diferencia entre la cantidad de Adenina de las secuencias de dos países significaría algo importante, como que el archivo está mal o es otra variante.
+
+A partir de las gráficas del árbol filogenético, se pueden interpretar una variedad de ideas, y es que a partir de una versión original de ómicron reportada por primera vez en Botswana, Hong Kong o Sudáfrica, esta secuencia se dividió en diferentes continentes y países, cada uno siendo representado por una rama diferente.
+
+En el primer caso, tenemos al cuadrante rojo, uno de los más claros, ya que todos, a excepción de España, son países asiáticos, pero la división filogenética no para ahí, porque en el sub cuadrante morado podemos notar que Japón y Corea del Sur son países geográficamente muy cercanos, y Vietnam no se queda atrás, mientras que los otros dos países asiáticos del cuadrante rojo se encuentran más alejados, esto puede ser debido a que entre más cerca se encuentren los países más contacto biológico hay.
+
+El segundo cuadrante sumamente importante es el verde, ya que en este encontramos países únicamente de Europa, reforzando la teoría que la cercanía geográfica significa también una región donde la secuencia de la variante ómicron evoluciono por separado del resto del mundo. 
+
+El tercer gran cuadrante es el Azul, en donde se encuentran los países exclusivos de América, algo interesante de este recuadro es que nuevamente, entre más cercanos se encuentran los países, sus secuencias son más parecidas, teniendo los 3 países Sudamericanos con más coincidencias que con E.E.U.U.
+
+Finalmente, tenemos ligeras excepciones a la regla de cercanía geográfica, como lo es el recuadro amarillo, con Australia e Irán, pero estas situaciones son fácilmente justificables, ya que a través de un viaje, la versión de la secuencia que llego a Australia, o viceversa, la que llego a Irán puede haber sido transmitida por el otro país. Esta situación también puede justificar al Reino Unido, Rusia y Turquía, secuencias las cuales encontraron más cercanía con América que con Europa o Asia, pero se debe de denotar que todos los países dentro del recuadro gris pueden ser considerados de "occidente", ya que tienen territorio, ya sea en Europa o América, algo que sería importante recalcar, ya que al ser culturalmente similares igualmente son más propensos a interactuar entre sí, y, por lo tanto, al intercambio biológico.
+
+### Fuentes bibliográficas
+
+* Pettersson, H., Manley, B., & Hernandez, S. (2022, May 5). Tracking Covid-19’s global spread. CNN. https://edition.cnn.com/interactive/2020/health/coronavirus-maps-and-cases/
+* Freunde von GISAID e.V. (2022). GISAID - Initiative. GISAID. https://www.gisaid.org/
+* Nextstrain. (n.d.). auspice. https://nextstrain.org/ncov/gisaid/global
+* Johns Hopkins. (n.d.). COVID-19 Map. Johns Hopkins Coronavirus Resource Center. https://coronavirus.jhu.edu/map.html
+* Taylor, D. B. (2021, March 17). The Coronavirus Pandemic: A Timeline. The New York Times. https://www.nytimes.com/article/coronavirus-timeline.html
+
+```{r}
+citation("dplyr")
+citation("Biostrings")
+citation("seqinr")
+citation("adegenet")
+citation("ape")
+citation("phangorn")
+citation("phytools")
+citation("geiger")
+citation("BiocManager")
+citation("ggtree")
+citation("DECIPHER")
+citation("viridis")
+citation("ggplot2")
+citation("viridis")
+citation("ggmsa")
+```
